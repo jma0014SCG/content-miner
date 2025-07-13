@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Download, Copy, CheckCircle } from 'lucide-react'
 import LoadingSkeleton from '../components/LoadingSkeleton'
@@ -22,7 +22,6 @@ function ResultPage() {
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
   const [copied, setCopied] = useState(false)
-  const hasInitiatedRequest = useRef(false)
 
   const { url, type } = location.state || {}
 
@@ -31,12 +30,6 @@ function ResultPage() {
       navigate('/')
       return
     }
-
-    // Prevent duplicate calls in React.StrictMode
-    if (hasInitiatedRequest.current) {
-      return
-    }
-    hasInitiatedRequest.current = true
 
     const fetchResult = async () => {
       try {

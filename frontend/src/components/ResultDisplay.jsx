@@ -18,7 +18,7 @@ import ContentCard from './ContentCard'
 import UtilityBar from './UtilityBar'
 
 function ResultDisplay({ result, type, url }) {
-  const [activeTab, setActiveTab] = useState('highlights')
+  const [activeTab, setActiveTab] = useState(type === 'video' ? 'highlights' : 'insights')
   
   // Parse the summary to extract sections
   const parseSummary = (summary) => {
@@ -165,99 +165,187 @@ function ResultDisplay({ result, type, url }) {
     )
   }
 
-  // Channel analysis version - back to simple working layout
+  // Channel analysis version
+  if (!result) {
+    return (
+      <div style={{ padding: '40px', textAlign: 'center' }}>
+        <h2>No Result Data</h2>
+        <p>The channel analysis result is null or undefined.</p>
+      </div>
+    );
+  }
+
+  // Get analysis content with multiple fallbacks
+  let analysisContent = '';
+  if (result.analysis) {
+    if (typeof result.analysis === 'string') {
+      analysisContent = result.analysis;
+    } else {
+      analysisContent = JSON.stringify(result.analysis, null, 2);
+    }
+  } else if (result.summary) {
+    analysisContent = result.summary;
+  } else {
+    analysisContent = 'Channel analysis completed but no content found. Check backend response structure.';
+  }
+  
+  // Create sections - using the same logic as video but simpler
+  const channelSections = [];
+  
+  // Try to parse with markdown headers first
+  if (analysisContent.includes('##')) {
+    const sections = parseSummary(analysisContent);
+    if (sections.length > 0) {
+      channelSections.push(...sections);
+    }
+  }
+  
+  // If no sections from parsing, create a default one
+  if (channelSections.length === 0) {
+    channelSections.push({
+      id: 'channel-insights',
+      title: 'Channel Insights',
+      content: [analysisContent]
+    });
+  }
+  
+  // Add content opportunities if they exist
+  if (result.content_gaps && Array.isArray(result.content_gaps) && result.content_gaps.length > 0) {
+    channelSections.push({
+      id: 'content-opportunities',
+      title: 'Content Opportunities',
+      content: result.content_gaps.map((gap, index) => `${index + 1}. ${gap}`)
+    });
+  }
+  
+  const keyInsightsSection = channelSections[0];
+  const otherSections = channelSections.slice(1);
+
   return (
-    <div className="grid lg:grid-cols-[220px_1fr_140px] gap-8 max-w-7xl mx-auto">
-      {/* Left Anchor Rail - simplified for channel */}
-      <nav className="hidden lg:block sticky top-24 space-y-3 h-fit">
-        <h3 className="text-sm font-semibold text-gray-900 mb-4">Quick Navigation</h3>
-        <button
-          onClick={() => document.getElementById('channel-insights')?.scrollIntoView({ behavior: 'smooth' })}
-          className="block w-full text-left text-sm text-gray-600 hover:text-emerald-600 transition-colors py-1"
-        >
-          Channel Insights
-        </button>
-        {result.content_gaps && result.content_gaps.length > 0 && (
-          <button
-            onClick={() => document.getElementById('content-opportunities')?.scrollIntoView({ behavior: 'smooth' })}
-            className="block w-full text-left text-sm text-gray-600 hover:text-emerald-600 transition-colors py-1"
-          >
-            Content Opportunities
-          </button>
-        )}
-      </nav>
+    <div className="content-wrapper">
+      {/* Left Rail - Quick Navigation */}
+      <div className="left-rail">
+        <AnchorRail sections={channelSections} />
+      </div>
       
       {/* Main Content */}
-      <div className="min-w-0">
-        {/* Channel Metadata Header */}
-        <div className="rounded-2xl shadow-sm bg-white/90 backdrop-blur border border-gray-100 p-6 mb-8">
-          <div className="flex items-start justify-between mb-3">
-            <h1 className="text-xl font-semibold text-gray-900 leading-tight">
-              Channel Analysis
-            </h1>
+      <div className="main-content">
+        {/* Channel Metadata - simplified version */}
+        <div className="card" style={{ marginBottom: 'var(--space-6)' }}>
+          <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: 700, color: '#111827' }}>
+            Channel Analysis
+          </h1>
+          {url && (
             <a
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center px-4 py-2 text-sm font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors shrink-0 ml-4"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                marginTop: '16px',
+                padding: '8px 16px',
+                fontSize: '14px',
+                fontWeight: 500,
+                color: '#18a7ff',
+                background: 'rgba(24, 167, 255, 0.05)',
+                border: '1px solid rgba(24, 167, 255, 0.2)',
+                borderRadius: '8px',
+                textDecoration: 'none'
+              }}
             >
               <ExternalLink className="w-4 h-4 mr-2" />
               View Channel
             </a>
-          </div>
-          
-          {result.metadata && (
-            <div className="flex items-center space-x-6 text-sm text-gray-600">
-              {result.metadata.subscriber_count && (
-                <div className="flex items-center">
-                  <UsersIcon className="w-4 h-4 mr-1" />
-                  {result.metadata.subscriber_count} subscribers
+          )}
+        </div>
+        
+        <NavigationTabs 
+          activeTab={activeTab} 
+          onTabChange={setActiveTab}
+          tabs={['insights', 'strategy', 'export']}
+        />
+        
+        <div style={{ marginBottom: 'var(--space-4)' }}>
+          {activeTab === 'insights' && (
+            <div style={{ marginBottom: 'var(--space-4)' }}>
+              {/* Hero Key Insights Section */}
+              {keyInsightsSection && (
+                <div className="card" style={{ 
+                  background: 'linear-gradient(to right, #f0fdf4, #eff6ff)',
+                  border: '2px solid #10b981',
+                  marginBottom: 'var(--space-6)'
+                }}>
+                  <div className="section-head">
+                    <div style={{ 
+                      width: '40px', 
+                      height: '40px', 
+                      background: '#10b981', 
+                      borderRadius: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <TrendingUp className="w-6 h-6 text-white" />
+                    </div>
+                    <h2 className="h1" style={{ margin: 0, color: 'var(--gray-900)' }}>
+                      {keyInsightsSection.title}
+                    </h2>
+                  </div>
+                  <div className="prose-enhanced body" style={{ lineHeight: '1.6' }}>
+                    <ReactMarkdown>{keyInsightsSection.content.join('\n')}</ReactMarkdown>
+                  </div>
                 </div>
               )}
-              {result.metadata.video_count && (
-                <div className="flex items-center">
-                  <TrendingUp className="w-4 h-4 mr-1" />
-                  {result.metadata.video_count} videos
+              
+              {/* Other Sections */}
+              {otherSections.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+                  {otherSections.map((section, index) => (
+                    <ContentCard
+                      key={section.id}
+                      id={section.id}
+                      title={section.title}
+                      content={section.content.join('\n')}
+                      defaultOpen={index < 2}
+                      designSystem={true}
+                    />
+                  ))}
                 </div>
               )}
             </div>
           )}
-        </div>
-
-        {/* Content Cards */}
-        <div className="space-y-6">
-          {result.analysis && (
-            <ContentCard
-              id="channel-insights"
-              title="Channel Insights"
-              content={typeof result.analysis === 'string' ? result.analysis : JSON.stringify(result.analysis, null, 2)}
-              defaultOpen={true}
-            />
+          
+          {activeTab === 'strategy' && (
+            <div>
+              <ContentCard
+                id="full-analysis"
+                title="Full Channel Analysis"
+                content={result.analysis ? (typeof result.analysis === 'string' ? result.analysis : JSON.stringify(result.analysis, null, 2)) : 'No analysis data available'}
+                defaultOpen={true}
+                designSystem={true}
+              />
+            </div>
           )}
-
-          {result.content_gaps && result.content_gaps.length > 0 && (
-            <div 
-              id="content-opportunities"
-              className="rounded-2xl shadow-sm bg-white/90 backdrop-blur border border-gray-100 hover:shadow-md transition-shadow p-6"
-            >
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Content Opportunities</h3>
-              <ul className="space-y-3">
-                {result.content_gaps.map((gap, index) => (
-                  <li key={index} className="flex items-start">
-                    <span className="bg-emerald-100 text-emerald-800 text-xs font-medium px-2 py-1 rounded-full mr-3 mt-0.5 shrink-0">
-                      {index + 1}
-                    </span>
-                    <span className="text-gray-700">{gap}</span>
-                  </li>
-                ))}
-              </ul>
+          
+          {activeTab === 'export' && (
+            <div>
+              <ContentCard
+                id="export-options"
+                title="Export Options"
+                content="Choose your preferred format to export the channel analysis."
+                defaultOpen={true}
+                designSystem={true}
+              />
             </div>
           )}
         </div>
       </div>
       
-      {/* Right Utility Bar */}
-      <UtilityBar result={result} type={type} />
+      {/* Right Rail - Actions */}
+      <div className="right-rail">
+        <UtilityBar result={result} type={type} />
+      </div>
     </div>
   )
 }
