@@ -82,6 +82,44 @@
   color: var(--gray-600);
 }
 
+/* KPI Typography for Channel Analysis */
+.kpi-large {
+  font: 800 2.5rem/1.2 var(--font-sans);
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.kpi-medium {
+  font: 700 1.75rem/1.2 var(--font-sans);
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.kpi-label {
+  font: 600 0.875rem/1.4 var(--font-sans);
+  color: var(--gray-600);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.kpi-growth {
+  font: 600 1rem/1.4 var(--font-sans);
+  margin: 0;
+}
+
+.kpi-growth.positive {
+  color: #059669;
+}
+
+.kpi-growth.negative {
+  color: #dc2626;
+}
+
+.kpi-growth.neutral {
+  color: var(--gray-600);
+}
+
 /* Card Anatomy */
 .card {
   padding: 20px;
@@ -94,6 +132,39 @@
   overflow-wrap: break-word;
   word-wrap: break-word;
   overflow: hidden;
+}
+
+/* KPI Cards for Channel Metrics */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.kpi-card {
+  padding: var(--space-4);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid var(--gray-200);
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border-color: var(--blue-accent);
+}
+
+.kpi-card.primary {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border-color: var(--blue-accent);
+}
+
+.kpi-card.success {
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  border-color: #059669;
 }
 
 /* Section Headers */

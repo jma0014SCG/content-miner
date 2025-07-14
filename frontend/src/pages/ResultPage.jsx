@@ -32,11 +32,11 @@ function ResultPage() {
       return
     }
 
-    // Prevent duplicate calls in React.StrictMode
-    if (hasInitiatedRequest.current) {
-      return
-    }
-    hasInitiatedRequest.current = true
+    // Prevent duplicate calls in React.StrictMode (temporarily disabled for debugging)
+    // if (hasInitiatedRequest.current) {
+    //   return
+    // }
+    // hasInitiatedRequest.current = true
 
     const fetchResult = async () => {
       try {

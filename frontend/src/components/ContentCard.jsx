@@ -1,9 +1,16 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
-import { ChevronDown, ChevronUp, Copy, Clock } from 'lucide-react'
+import { ChevronDown, ChevronUp, Copy, Clock, Target, Users, TrendingUp, Lightbulb, BarChart3 } from 'lucide-react'
 
-function ContentCard({ id, title, content, defaultOpen = false, enhanced = false, designSystem = false }) {
+function ContentCard({ id, title, content, defaultOpen = false, enhanced = false, designSystem = false, forceOpen, sectionType }) {
   const [isOpen, setIsOpen] = useState(defaultOpen)
+  
+  // Handle forced open/close state
+  React.useEffect(() => {
+    if (forceOpen !== undefined) {
+      setIsOpen(forceOpen)
+    }
+  }, [forceOpen])
   const [copied, setCopied] = useState(false)
   const [showToast, setShowToast] = useState(false)
 
@@ -22,6 +29,53 @@ function ContentCard({ id, title, content, defaultOpen = false, enhanced = false
   }
 
   // Convert dense prose to bullet points (>120 chars per bullet)
+  // Get section-specific styling and icons
+  const getSectionConfig = (sectionType, title) => {
+    // Auto-detect section type from title if not provided
+    const titleLower = (title || '').toLowerCase()
+    const detectedType = sectionType || 
+      (titleLower.includes('content') && titleLower.includes('strategy') ? 'content-strategy' :
+       titleLower.includes('audience') || titleLower.includes('demographics') ? 'audience-analysis' :
+       titleLower.includes('growth') || titleLower.includes('opportunities') ? 'growth-opportunities' :
+       titleLower.includes('insights') ? 'insights' :
+       'default')
+
+    const configs = {
+      'content-strategy': {
+        icon: Target,
+        color: '#8b5cf6',
+        bgGradient: 'linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%)',
+        borderColor: '#8b5cf6'
+      },
+      'audience-analysis': {
+        icon: Users,
+        color: '#06b6d4',
+        bgGradient: 'linear-gradient(135deg, #cffafe 0%, #a5f3fc 100%)',
+        borderColor: '#06b6d4'
+      },
+      'growth-opportunities': {
+        icon: TrendingUp,
+        color: '#059669',
+        bgGradient: 'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)',
+        borderColor: '#059669'
+      },
+      'insights': {
+        icon: Lightbulb,
+        color: '#f59e0b',
+        bgGradient: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+        borderColor: '#f59e0b'
+      },
+      'default': {
+        icon: BarChart3,
+        color: 'var(--gray-600)',
+        bgGradient: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+        borderColor: 'var(--gray-300)'
+      }
+    }
+
+    return configs[detectedType] || configs.default
+  }
+
   const processContent = (text) => {
     // First handle timestamps
     let processed = text.replace(/(\d{1,2}:\d{2})/g, (match) => {
@@ -43,11 +97,32 @@ function ContentCard({ id, title, content, defaultOpen = false, enhanced = false
   }
 
   if (designSystem) {
+    const sectionConfig = getSectionConfig(sectionType, title)
+    const IconComponent = sectionConfig.icon
+
     return (
-      <div id={id} className="card">
+      <div 
+        id={id} 
+        className="card" 
+        style={{
+          background: sectionConfig.bgGradient,
+          border: `2px solid ${sectionConfig.borderColor}`,
+          transition: 'all 0.3s ease'
+        }}
+      >
         <div className="section-head">
-          <span className="timestamp">📝</span>
-          <h3 className="h3" style={{ margin: 0, flex: 1 }}>
+          <div style={{
+            width: '32px',
+            height: '32px',
+            background: sectionConfig.color,
+            borderRadius: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <IconComponent className="w-5 h-5 text-white" />
+          </div>
+          <h3 className="h3" style={{ margin: 0, flex: 1, color: sectionConfig.color }}>
             {title}
           </h3>
           <button
@@ -72,12 +147,13 @@ function ContentCard({ id, title, content, defaultOpen = false, enhanced = false
         </div>
         
         <div 
-          className={`transition-all duration-300 ease-in-out ${
-            isOpen ? 'max-h-none opacity-100 overflow-visible' : 'max-h-0 opacity-0 overflow-hidden'
+          className={`transition-all duration-500 ease-in-out ${
+            isOpen ? 'max-h-screen opacity-100 overflow-visible' : 'max-h-0 opacity-0 overflow-hidden'
           }`}
           style={{ 
-            maxHeight: isOpen ? 'none' : '0',
-            overflow: isOpen ? 'visible' : 'hidden'
+            maxHeight: isOpen ? '9999px' : '0',
+            overflow: isOpen ? 'visible' : 'hidden',
+            transition: 'max-height 0.5s ease-in-out, opacity 0.3s ease-in-out'
           }}
         >
           <div className="prose-enhanced" style={{ width: '100%', minWidth: 0 }}>

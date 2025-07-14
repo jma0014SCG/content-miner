@@ -90,12 +90,40 @@ function AnchorRail({ sections }) {
               cursor: 'pointer',
               textAlign: 'left',
               width: '100%',
-              display: 'block'
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--space-1)',
+              transition: 'all 0.2s ease'
             }}
           >
-            <span style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {section.title}
+            {section.icon && (
+              <span style={{ 
+                fontSize: '14px',
+                width: '20px',
+                textAlign: 'center',
+                flexShrink: 0
+              }}>
+                {section.icon}
+              </span>
+            )}
+            <span style={{ 
+              display: 'block', 
+              overflow: 'hidden', 
+              textOverflow: 'ellipsis', 
+              whiteSpace: 'nowrap',
+              flex: 1
+            }}>
+              {section.title.replace(/^[^\s]*\s/, '')} {/* Remove emoji if already in icon */}
             </span>
+            {activeSection === section.id && (
+              <span style={{ 
+                color: 'var(--blue-accent)',
+                fontSize: '12px',
+                flexShrink: 0
+              }}>
+                ●
+              </span>
+            )}
           </button>
         ))}
       </div>

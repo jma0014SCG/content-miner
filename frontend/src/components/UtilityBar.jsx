@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Copy, Download, Share, FileText, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react'
+import { Copy, Download, Share, FileText, CheckCircle, ChevronDown, ChevronUp, TrendingUp, Users } from 'lucide-react'
 
 function UtilityBar({ result, type }) {
   const [copied, setCopied] = useState(false)
@@ -72,9 +72,9 @@ function UtilityBar({ result, type }) {
   }
 
   return (
-    <aside className="hidden lg:flex flex-col sticky top-24 h-fit right-rail">
+    <aside className="hidden lg:flex flex-col sticky top-24 h-fit right-rail" style={{ position: 'sticky', top: '24px', alignSelf: 'flex-start' }}>
       <h3 className="caption" style={{ fontWeight: 600, color: 'var(--gray-900)', marginBottom: 'var(--space-3)' }}>
-        Actions
+        {type === 'channel' ? 'Channel Actions' : 'Actions'}
       </h3>
       
       {/* Copy Group */}
@@ -220,6 +220,59 @@ function UtilityBar({ result, type }) {
           )}
         </div>
       </div>
+
+      {/* Channel-specific actions */}
+      {type === 'channel' && (
+        <>
+          {/* Track Channel Group */}
+          <div className="action-group">
+            <button
+              onClick={() => alert('Channel tracking coming soon!')}
+              className="action-button card"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '100%',
+                background: 'rgba(34, 197, 94, 0.05)',
+                border: '1px solid rgba(34, 197, 94, 0.2)',
+                fontSize: '14px',
+                fontWeight: 500,
+                color: '#059669',
+                cursor: 'pointer'
+              }}
+              title="Track channel growth over time"
+            >
+              <TrendingUp className="w-4 h-4 mr-2" />
+              Track Growth
+            </button>
+          </div>
+          
+          {/* Compare Channel Group */}
+          <div className="action-group">
+            <button
+              onClick={() => alert('Channel comparison coming soon!')}
+              className="action-button card"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '100%',
+                background: 'rgba(168, 85, 247, 0.05)',
+                border: '1px solid rgba(168, 85, 247, 0.2)',
+                fontSize: '14px',
+                fontWeight: 500,
+                color: '#7c3aed',
+                cursor: 'pointer'
+              }}
+              title="Compare with other channels"
+            >
+              <Users className="w-4 h-4 mr-2" />
+              Compare
+            </button>
+          </div>
+        </>
+      )}
 
       {/* Share Group */}
       <div className="action-group">
